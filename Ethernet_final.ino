@@ -33,6 +33,18 @@ void loop() {
   float ti, te, ui, ue;
   int status = 0;
   //CRIA UMA CONEXÃO COM O CLIENTE
+  sensors_event_t event_in;
+  sensors_event_t event_ex;
+  dht_in.temperature().getEvent(&event_in);
+  dht_ex.temperature().getEvent(&event_ex);
+  dht_in.temperature().getEvent(&event_in);
+  ti = (float) event_in.temperature;
+  dht_in.humidity().getEvent(&event_in);
+  ui = (float) event_in.relative_humidity;
+  dht_ex.temperature().getEvent(&event_ex);
+  te = (float) event_ex.temperature;
+  dht_ex.humidity().getEvent(&event_ex);
+  ue = (float) event_ex.relative_humidity;
   EthernetClient client = server.available();
   if (client) { // SE EXISTE CLIENTE, FAZ
     while (client.connected()) {//ENQUANTO EXISTIR CLIENTE CONECTADO, FAZ
@@ -65,29 +77,17 @@ void loop() {
           client.println("<meta http-equiv=""refresh"" content=""900000"">");
           client.println("<title>Monitor de temperatura - Controlador de Energia</title>"); //ESCREVE O TEXTO NA PÁGINA
           client.println("</head>"); //FECHA A TAG "head
-          sensors_event_t event_in;
-          sensors_event_t event_ex;
-          dht_in.temperature().getEvent(&event_in);
-          dht_ex.temperature().getEvent(&event_ex);
           client.println("<body style=background-color:#ADD8E6>"); //DEFINE A COR DE FUNDO DA PÁGINA
           client.println("<center><font color='blue'><h1>Monitor de Temperatura e Umidade</font></center></h1>"); //ESCREVE "MASTERWALKER SHOP" EM COR AZUL NA PÁGINa
           client.println("<br></br>");
-          dht_in.temperature().getEvent(&event_in);
-          ti = (float) event_in.temperature;
           client.print("<div text-align:center><center><font size='5'>Temperatura atual na parte interna da maquina:");
           client.print(ti);
           client.print(" C</center></div><br></br>");
-          dht_in.humidity().getEvent(&event_in);
-          ui = (float) event_in.relative_humidity;
           client.print("<div text-align:center><center><font size='5'>Umidade atual na parte interna da maquina:");
           client.print(ui);
           client.print(" %</center></div><br></br>");
-          dht_ex.temperature().getEvent(&event_ex);
-          te = (float) event_ex.temperature;
           client.print("<div text-align:center><center><font size='5'>Temperatura atual na parte externa da maquina:");
           client.print(te);
-          dht_ex.humidity().getEvent(&event_ex);
-          ue = (float) event_ex.relative_humidity;
           client.print("  C</center></div><br></br>");
           client.print("<div text-align:center><center><font size='5'>Umidade atual na parte externa da maquina:");
           client.print(ue);
@@ -106,23 +106,24 @@ void loop() {
           }
           if (te > 30.0) {
             digitalWrite(rele, LOW);
-            client.println("<center><font color='red' size='8'>Ar condicionado desligado automaticamente devido a alta temperatura na sala - será automaticamente religado em 15 minutos</center>");
+            client.println("<br></br><center><font color='red' size='8'>Ar condicionado desligado automaticamente devido a alta temperatura na sala - sera automaticamente religado em 15 minutos</center>");
             delay(900000);
             digitalWrite(rele, HIGH);
           }
           client.println("</body>"); //FECHA A TAG "body"
           client.println("</html>"); //FECHA A TAG "html"
           readString = ""; //A VARIÁVEL É REINICIALIZADA
-          espSerial.println(ti);
-          delay(1000);
-          espSerial.println(te);
-          delay(1000);
-          espSerial.println(ui);
-          delay(1000);
-          espSerial.println(ue);
           client.stop();
         }
       }
     }
   }
+  espSerial.println(ti);
+  delay(1000);
+  espSerial.println(te);
+  delay(1000);
+  espSerial.println(ui);
+  delay(1000);
+  espSerial.println(ue);
+  delay(1000);
 }
